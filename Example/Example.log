@@ -1,0 +1,147 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2014.10.13 09:49:27 =~=~=~=~=~=~=~=~=~=~=~=
+
+
+
+Test Set 1: foo
+
+  Test Case 1-1: test_foo_max_param2_param1_equal
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = MAX_PARAM/2 (16383)
+    > Let p2 = MAX_PARAM (32766)
+    > Let barReturn = MAX_PARAM/2 (16383)
+    + Calling UUT foo...
+    - Returned from UUT.
+    < barParam should be MAX_PARAM (32766), is 32766: PASS
+
+    Reference: 102
+    < Returned value should be p1 (16383), is 16383: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-2: test_foo_max_param2_param1_greater
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = MAX_PARAM/2+1 (16384)
+    > Let p2 = MAX_PARAM (32766)
+    > Let barReturn = p2/2 (16383)
+    + Calling UUT foo...
+    - Returned from UUT.
+    < barParam should be MAX_PARAM (32766), is 32766: PASS
+
+    Reference: 102
+    < Returned value should be p1 (16384), is 16384: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-3: test_foo_max_param2_param2_out
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = MAX_PARAM/2-1 (16382)
+    > Let p2 = MAX_PARAM (32766)
+    > Let barReturn = p2/2 (16383)
+    + Calling UUT foo...
+    - Returned from UUT.
+    < barParam should be MAX_PARAM (32766), is 32766: PASS
+
+    Reference: 101
+    < Returned value should be p2 (32766), is 32766: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-4: test_foo_min_param1_param1_equal
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = 1 (1)
+    > Let p2 = 2 (2)
+    > Let barReturn = p2/2 (1)
+    + Calling UUT foo...
+    - Returned from UUT.
+    < barParam should be 2 (2), is 2: PASS
+
+    Reference: 102
+    < Returned value should be p1 (1), is 1: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-5: test_foo_min_param1_param1_greater
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = 1 (1)
+    > Let p2 = 1 (1)
+    > Let barReturn = p2/2 (0)
+    + Calling UUT foo...
+    - Returned from UUT.
+    < barParam should be 1 (1), is 1: PASS
+
+    Reference: 102
+    < Returned value should be p1 (1), is 1: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-6: test_foo_min_param1_param2_out
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = 1 (1)
+    > Let p2 = 4 (4)
+    > Let barReturn = p2/2 (2)
+    + Calling UUT foo...
+    - Returned from UUT.
+    < barParam should be 4 (4), is 4: PASS
+
+    Reference: 101
+    < Returned value should be p2 (4), is 4: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-7: test_foo_neg_param1
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = -1 (-1)
+    > Let p2 = 100 (100)
+    > Let barReturn = UTEST_INVALID_DATA (57005)
+    + Calling UUT foo...
+    - Returned from UUT.
+
+    Reference: 103
+    < Returned value should be 0 (0), is 0: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-8: test_foo_neg_param2
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = 100 (100)
+    > Let p2 = -1 (-1)
+    > Let barReturn = UTEST_INVALID_DATA (57005)
+    + Calling UUT foo...
+    - Returned from UUT.
+
+    Reference: 103
+    < Returned value should be 0 (0), is 0: PASS
+
+  Result: _PASS_
+
+
+  Test Case 1-9: test_foo_neg_params
+    > Let barParam = UTEST_INVALID_DATA (57005)
+    > Let p1 = -1 (-1)
+    > Let p2 = -1 (-1)
+    > Let barReturn = UTEST_INVALID_DATA (57005)
+    + Calling UUT foo...
+    - Returned from UUT.
+
+    Reference: 103
+    < Returned value should be 0 (0), is 0: PASS
+
+  Result: _PASS_
+
+
+
+Test Set Results:  9 of  9 test cases passed: 100%
+
+
+
+Set  Pass  Fail
+  1     9     0    100%
+------------------------
+Total   9     0    100%

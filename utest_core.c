@@ -25,8 +25,14 @@ int* utestCalls[UTEST_CONFIG_MAX_NUM_SUB_CALLS];
 UTestSet_t utestSet[UTEST_CONFIG_MAX_NUM_TEST_SETS];
 UTestCase_t utestCase[UTEST_CONFIG_MAX_NUM_TEST_CASES];
 
+unsigned char utestVerbose = U_TRUE;
 
 /* Public Methods ********************/
+
+void utest_set_utestVerbose(unsigned char set)
+{
+	utestVerbose = set;
+}
 
 void utest_add_testset(char* fut,void (*beforeall)(void), void (*beforeeach)(void))
 {
@@ -52,7 +58,7 @@ void utest_add_testcase(char* testname, void (*testfn)(void))
 void utest_perform_case(unsigned int testcase)
 {
 	sprintf(utestBuf,"\r\n  Test Case %d-%d: %s\r\n", utestCase[testcase].whichSet+1, testcase-utestSet[utestCase[testcase].whichSet].firstCase+1, utestCase[testcase].description);
-	utest_puts(utestBuf);
+	if(utestVerbose) utest_puts(utestBuf);
 	utestCallCount = 0;
 	utestResult = UTEST_RESULT_PASS;
 	(*utestSet[utestCase[testcase].whichSet].beforeEach)();
@@ -67,7 +73,7 @@ void utest_perform_case(unsigned int testcase)
 void utest_perform_set(unsigned int testset)
 {
 	sprintf(utestBuf,"\r\n\n\nTest Set %d: %s\r\n", testset+1, utestSet[testset].description);
-	utest_puts(utestBuf);
+	if(utestVerbose) utest_puts(utestBuf);
 	utestPassCount = 0;
 	(*utestSet[testset].beforeAll)();
 	for (utestCaseI = utestSet[testset].firstCase; utestCaseI < (utestSet[testset].firstCase + utestSet[testset].numCases); utestCaseI++)
@@ -75,7 +81,7 @@ void utest_perform_set(unsigned int testset)
 		utest_perform_case(utestCaseI);
 	}
 	sprintf(utestBuf,"\r\n\nTest Set Results: % 2d of % 2d test cases passed: %d%%\r\n", utestPassCount, utestSet[testset].numCases, (utestPassCount*100)/utestSet[testset].numCases);
-	utest_puts(utestBuf);
+	if(utestVerbose) utest_puts(utestBuf);
 }
 
 
@@ -95,76 +101,100 @@ void utest_ref(char* x)
 }
 
 
+void utest_rem(char* x)
+{
+	sprintf(utestBuf,"\r\n    %s\r\n", x);
+	utest_puts(utestBuf);
+}
+
+
 void utest_let(char* varname, char* valname, unsigned long val)
 {
-	sprintf(utestBuf,"    > Let %s = %s (%ld)\r\n", varname, valname, (long)val);
-	utest_puts(utestBuf); \
+	sprintf(utestBuf,"      > Let %s = %s (%ld)\r\n", varname, valname, (long)val);
+	if(utestVerbose) utest_puts(utestBuf); 
 }
 
 
 void utest_precall(char* fn)
 {
-	sprintf(utestBuf, "    + Calling UUT %s...\r\n", fn);
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "        + Calling UUT %s...\r\n", fn);
+	if(utestVerbose) utest_puts(utestBuf);
 	utestRetval = UTEST_INVALID_DATA;
 	utestTimestamp0 = clock();
 }
 
 
-void utest_postcall(long ret)
+void utest_postfunc(long ret)
 {
 	utestRetval = ret;
 	utestTimestamp1 = clock();
-	sprintf(utestBuf, "    - Returned from UUT.\r\n");
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "        - Returned from UUT.\r\n");
+	if(utestVerbose) utest_puts(utestBuf);
+}
+
+
+void utest_postsub(void)
+{
+	utestTimestamp1 = clock();
+	sprintf(utestBuf, "        - Returned from UUT.\r\n");
+	if(utestVerbose) utest_puts(utestBuf);
 }
 
 
 void utest_assert(char* varname, char* expname, long var, long exp)
 {
 	if(var != exp) utestResult = UTEST_RESULT_FAIL;
-	sprintf(utestBuf, "    < %s should be %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var == exp) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "      < %s should be %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var == exp) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 }
 
 
 void utest_assert_not_equal(char* varname, char* expname, long var, long exp)
 {
 	if(var == exp) utestResult = UTEST_RESULT_FAIL;
-	sprintf(utestBuf, "    < %s should not be %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var != exp) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "      < %s should not be %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var != exp) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 }
 
 
 void utest_assert_less(char* varname, char* expname, long var, long exp)
 {
 	if(var >= exp) utestResult = UTEST_RESULT_FAIL;
-	sprintf(utestBuf, "    < %s should be less than %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var < exp) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "      < %s should be less than %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var < exp) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 }
 
 
 void utest_assert_more(char* varname, char* expname, long var, long exp)
 {
 	if(var <= exp) utestResult = UTEST_RESULT_FAIL;
-	sprintf(utestBuf, "    < %s should be less than %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var > exp) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "      < %s should be less than %s (%ld), is %ld: %s\r\n", varname, expname, exp, var, (var > exp) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 }
 
 
 void utest_assert_between(char* varname, char* minname, char* maxname, long var, long min, long max)
 {
 	if((var < min) || (var > max)) utestResult = UTEST_RESULT_FAIL;
-	sprintf(utestBuf, "    < %s should be between %s (%ld) and %s (%ld), is %ld: %s\r\n", varname, minname, min, maxname, max, var, ((var >= min) && (var <= max)) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "      < %s should be between %s (%ld) and %s (%ld), is %ld: %s\r\n", varname, minname, min, maxname, max, var, ((var >= min) && (var <= max)) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
+}
+
+
+void utest_assert_string_equal(char* varname, char* var, char *exp)
+{
+    utestTemp = strcmp(var, exp);
+    if(0 != utestTemp) utestResult = UTEST_RESULT_FAIL;
+    sprintf(utestBuf, "      < %s should be %s, is %s: %s\r\n", varname, exp, var, (utestTemp==0) ? "PASS" : "FAIL");
+    if(utestVerbose) utest_puts(utestBuf);
 }
 
 
 void utest_assert_return(char* expname, long exp)
 {
 	if(utestRetval != exp) utestResult = UTEST_RESULT_FAIL;
-	sprintf(utestBuf, "    < Returned value should be %s (%ld), is %ld: %s\r\n", expname, exp, utestRetval, (utestRetval == exp) ? "PASS" : "FAIL");
-	utest_puts(utestBuf); \
+	sprintf(utestBuf, "      < Returned value should be %s (%ld), is %ld: %s\r\n", expname, exp, utestRetval, (utestRetval == exp) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf); 
 }
 
 
@@ -173,8 +203,8 @@ void utest_assert_time(unsigned long x, unsigned long tol)
 	utestTemp = 1;
 	if ((utestTimestamp1 - utestTimestamp0) > ((unsigned long)(x + tol) * UTEST_CONFIG_CLOCKS_PER_USEC)) utestTemp = 0;
 	if ((utestTimestamp1 - utestTimestamp0) < ((unsigned long)(x - tol) * UTEST_CONFIG_CLOCKS_PER_USEC)) utestTemp = 0;
-	sprintf(utestBuf,"    < Time should have been %ldus +/- %ldus, was %luus: %s\r\n", x, tol, (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC, (utestTemp == 1) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf,"      < Time should have been %ldus +/- %ldus, was %luus: %s\r\n", x, tol, (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC, (utestTemp == 1) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 	if (utestTemp == 0) utestResult = UTEST_RESULT_FAIL;
 }
 
@@ -183,8 +213,8 @@ void utest_assert_time_exceeds(unsigned long x)
 {
 	utestTemp = 1;
 	if ((utestTimestamp1 - utestTimestamp0) < (x * UTEST_CONFIG_CLOCKS_PER_USEC)) utestTemp = 0;
-	sprintf(utestBuf,"    < Time should have been %ldus or more, was %luus: %s\r\n", x, (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC, (utestTemp == 1) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf,"      < Time should have been %ldus or more, was %luus: %s\r\n", x, (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC, (utestTemp == 1) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 	if (utestTemp == 0) utestResult = UTEST_RESULT_FAIL;
 }
 
@@ -193,8 +223,8 @@ void utest_assert_time_beats(unsigned long x)
 {
 	utestTemp = 1;
 	if ((utestTimestamp1 - utestTimestamp0) > (x * UTEST_CONFIG_CLOCKS_PER_USEC)) utestTemp = 0;
-	sprintf(utestBuf,"    < Time should have been %ldus or less, was %luus: %s\r\n", x, (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC, (utestTemp == 1) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf,"      < Time should have been %ldus or less, was %luus: %s\r\n", x, (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC, (utestTemp == 1) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 	if (utestTemp == 0) utestResult = UTEST_RESULT_FAIL;
 }
 
@@ -214,16 +244,57 @@ void utest_assert_called(char* fname, int* fp)
 		if (utestCalls[utestI] == fp) utestTemp = 1;
 	}
 	if (utestTemp == 0) utestResult = UTEST_RESULT_FAIL;
-	sprintf(utestBuf, "    < Should have run %s: %s\r\n", fname, (utestTemp == 1) ? "PASS" : "FAIL");
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "      < Should have run %s: %s\r\n", fname, (utestTemp == 1) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
+}
+
+
+void utest_assert_not_called(char* fname, int* fp)
+{
+	utestTemp = 0;
+	for (utestI = 0; utestI < utestCallCount; utestI++)
+	{
+		if (utestCalls[utestI] == fp) utestTemp = 1;
+	}
+	if (utestTemp == 1) utestResult = UTEST_RESULT_FAIL;
+	sprintf(utestBuf, "      < Should not have run %s: %s\r\n", fname, (utestTemp == 0) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
+}
+
+
+void utest_assert_called_n(char* fname, int* fp, int n)
+{
+	utestTemp = 0;
+	int count_temp = 0;
+	if( n == 0) utestTemp = 1; /* Allow for n=0, which would not exist in call list */
+	for (utestI = 0; utestI < utestCallCount; utestI++)
+	{
+		if ((utestCalls[utestI] == fp))
+		{
+			count_temp ++;
+			if(count_temp == n)
+			{
+				utestTemp = 1;	
+			}
+			else
+			{
+				utestTemp = 0;
+			}
+		}
+	}
+
+	if (utestTemp == 0) utestResult = UTEST_RESULT_FAIL;
+	sprintf(utestBuf, "      < Should have run %s %d times, was (%d) times: %s\r\n", fname,n, count_temp, (utestTemp == 1) ? "PASS" : "FAIL");
+	if(utestVerbose) utest_puts(utestBuf);
 }
 
 
 void utest_benchmark(void)
 {
-	sprintf(utestBuf, "      @ Benchmark time of UUT: %luus\r\n", (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC);
-	utest_puts(utestBuf);
+	sprintf(utestBuf, "        @ Benchmark time of UUT: %luus\r\n", (utestTimestamp1 - utestTimestamp0) / UTEST_CONFIG_CLOCKS_PER_USEC);
+	if(utestVerbose) utest_puts(utestBuf);
 }
+
 
 void utest_summary(void)
 {

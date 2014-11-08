@@ -1,11 +1,19 @@
 /* Unit Testing Port File */
 
+#define PIC_EXPLORER
 
 
 /* ADD PLATFORM CONFIGURATION HERE */
+#ifdef LAM_BOARD
 _FOSCSEL(FNOSC_PRI)
 _FOSC(FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMD_HS)
 _FWDT(FWDTEN_OFF)
+#endif
+#ifdef PIC_EXPLORER
+_FOSCSEL(FNOSC_PRIPLL)
+_FOSC(FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMD_XT)
+_FWDT(FWDTEN_OFF)
+#endif
 /* ADD PLATFORM CONFIGURATION HERE */
 
 
@@ -17,6 +25,13 @@ _FWDT(FWDTEN_OFF)
 */
 void utest_init(void)
 {
+
+    #ifdef PIC_EXPLORER
+    PLLFBD = 38;                    //  *40
+    CLKDIVbits.PLLPOST = 3;         //  /8
+    CLKDIVbits.PLLPRE = 0;          //  /2
+    #endif
+
 	/* Setup RA0 as Vref input */
 	LATAbits.LATA0 = 1U;
 	TRISAbits.TRISA0 = 1U;
@@ -140,6 +155,7 @@ void utest_init(void)
 	/* Setup RP20 as UART2 TX */
 	RPOR10bits.RP20R = 5U;
 
+
 	/* bit 15 UARTEN: 1 = UARTx is enabled; 0 = UARTx is disabled; */
 	/* bit 14 Unimplemented */
 	/* bit 13 USIDL: 0 = Continue operation in Idle mode */
@@ -173,7 +189,7 @@ void utest_init(void)
 
 	/* Load a value into Baud Rate Generator. */
 	/* U2BRG = (Fcy / (16 * BaudRate)) - 1 */
-	/*         ((20MHz/2) / (16*9600)) - 1 = 64 */
+	/*         ((20MHz/2) / (16*57600)) - 1 = 64 */
 	/* SRD588 */
 	U2BRG = 10U;
 

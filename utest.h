@@ -13,6 +13,8 @@
 #define UTEST_INVALID_DATA	0xDEAD
 #define UTEST_RESULT_FAIL	0
 #define UTEST_RESULT_PASS	1
+#define U_TRUE 1
+#define U_FALSE 0
 
 typedef struct tUTestSet
 {
@@ -82,6 +84,14 @@ typedef struct tUTestCase
 #define UTEST_ref(x) utest_ref(x)
 
 /**
+	This function outputs a remark or comment.
+    This function is used in building test cases or prequel functions.
+	It has no return value.
+	@param [in] x The numeric requirement reference to output
+*/
+#define UTEST_rem(x) utest_rem(x)
+
+/**
 	This function assigns a variable value and documents the action. This function
 	is used in building test cases or prequel functions. It has no return value.
 	@param [in] var The variable to set
@@ -98,7 +108,8 @@ typedef struct tUTestCase
 	@param [in] fn This is a pointer to the function under test
 	@param [in] ... A variable-length list of any parameters that the function under test takes
 */
-#define UTEST_call(fn,...) { utest_precall(#fn); utest_postcall((long)fn(__VA_ARGS__)); }
+#define UTEST_call(fn,...) { utest_precall(#fn); utest_postfunc((long)fn(__VA_ARGS__)); }
+#define UTEST_void_call(fn,...) { utest_precall(#fn); fn(__VA_ARGS__); utest_postsub(); }
 
 /**
 	This function tests and documents an equal assertion. It has no return value. Falseness
@@ -114,7 +125,7 @@ typedef struct tUTestCase
 	@param [in] var The variable to test
 	@param [in] exp The expected value to test against
 */
-#define UTEST_assert_not_equal(var,exp) utest_assert(#var,#exp,var,exp)
+#define UTEST_assert_not_equal(var,exp) utest_assert_not_equal(#var,#exp,var,exp)
 
 /**
 	This function tests and documents the assertion that the variable < expected value.
@@ -140,6 +151,8 @@ typedef struct tUTestCase
 	@param [in] max The upper-range value to test against
 */
 #define UTEST_assert_between(var,min,max) utest_assert(#var,#min,#max,var,min,max)
+
+#define UTEST_assert_string_equal(var,exp) utest_assert_string_equal(#var, var, exp)
 
 /**
 	This function tests and documents an equal assertion against the return value of the function
@@ -188,6 +201,16 @@ typedef struct tUTestCase
 	@param [in] x This is a pointer to the subroutine to be checked for execution
 */
 #define UTEST_assert_called(x) utest_assert_called(#x,(int*)x)
+#define UTEST_assert_not_called(x) utest_assert_not_called(#x,(int*)x)
+
+/**
+	This function tests and documents the assertion that the specified subroutine was
+	called n times by the FUT. It has no return value. 	Falseness of the assertion will cause
+	the present test case to fail.
+	@param [in] x This is a pointer to the subroutine to be checked for execution
+	@param [in] n This is a integer to be compared to number of subroutine calls
+*/
+#define UTEST_assert_called_n(x, n) utest_assert_called_n(#x,(int*)x, (int) n)
 
 /**
 	This function documents the accumulated results of all test set and their constituent
@@ -222,6 +245,14 @@ typedef struct tUTestCase
 */
 #define UTEST_puts(str) utest_puts(str);
 
+/**
+	This function sets the verbose output property to s
+	TRUE verbose output prints every details from test, FALSE verbose only prints refs and asserts with PASS/FAIL
+	Default is TRUE
+	@param [in] s TRUE or FALSE for verbose output
+*/
+#define UTEST_set_verbose(s) utest_set_utestVerbose(s);
+
 
 
 extern void utest_add_testset(char* fut,void (*beforeall)(void), void (*beforeeach)(void));
@@ -229,7 +260,7 @@ extern void utest_add_testcase(char* testname, void (*testfn)(void));
 extern void utest_perform_case(unsigned int testcase);
 extern void utest_perform_set(unsigned int testset);
 extern void utest_perform_all(void);
-extern void utest_ref(unsigned int x);
+extern void utest_ref(char* x);
 extern void utest_let(char* varname, char* valname, unsigned long val);
 extern void utest_precall(char* fn);
 extern void utest_postcall(long ret);
@@ -244,6 +275,7 @@ extern void utest_assert_time_exceeds(unsigned long x);
 extern void utest_assert_time_beats(unsigned long x);
 extern void utest_count_calls(int* x);
 extern void utest_assert_called(char* fname, int* fp);
+extern void utest_assert_not_called(char* fname, int* fp);
 extern void utest_benchmark(void);
 extern void utest_summary(void);
 

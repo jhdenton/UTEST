@@ -19,7 +19,7 @@
 #define UTEST_CONFIG_MAX_NUM_TEST_CASES		200
 
 /** This is the maximum allowed number of subroutines that may be called by the unit under test within any single test case. */
-#define UTEST_CONFIG_MAX_NUM_SUB_CALLS		25
+#define UTEST_CONFIG_MAX_NUM_SUB_CALLS		100
 
 /** This is the platform-specific number of clock ticks returned by the time.h clock() function. */
 #define UTEST_CONFIG_CLOCKS_PER_USEC		10
